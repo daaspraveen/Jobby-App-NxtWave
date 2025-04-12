@@ -9,7 +9,8 @@
 .jobs-side1-box {
   width: 30vw;
   max-width: 300px;
-  min-height: 90vh;
+  height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
@@ -17,8 +18,19 @@
   align-self: flex-start;
   gap: 10px;
   padding: 15px;
+  padding-bottom: 50px;
   position: sticky;
   top: 10vh;
+}
+.jobs-side1-box::-webkit-scrollbar {
+  width: 8px;
+}
+.jobs-side1-box::-webkit-scrollbar-thumb {
+  background-color: #272727;
+  border-radius: 5px;
+}
+.jobs-side1-box::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 .search-input-box {
   max-width: 300px;
@@ -66,6 +78,7 @@
   display: flex;
   max-width: 400px;
   min-width: 300px;
+  margin-left: auto;
 }
 .search-btn {
   align-self: stretch;
@@ -88,7 +101,9 @@
   border-radius: 20px;
   color: #000;
   padding: 20px;
-  overflow: hidden;
+  /* overflow: hidden; */
+  min-height: 100px;
+  flex-shrink: 0;
 }
 .error-profile-box {
   min-height: 100px;
@@ -156,7 +171,8 @@
 }
 .jobs-side2-box {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
+  margin: auto;
   padding: 15px;
   padding-top: 0;
   height: 100%;
@@ -244,6 +260,7 @@
   .jobs-side1-box {
     margin-top: 40px;
     min-height: auto;
+    height: auto;
   }
   .profile-box {
     border-radius: 40px;

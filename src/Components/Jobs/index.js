@@ -46,6 +46,14 @@ const salaryRangesList = [
   },
 ]
 
+const jobLocationsList = [
+  {location: 'Hyderabad', filtered: false},
+  {location: 'Bangalore', filtered: false},
+  {location: 'Chennai', filtered: false},
+  {location: 'Delhi', filtered: false},
+  {location: 'Mumbai', filtered: false},
+]
+
 const apiStatusList = {
   initial: 'INITIAL',
   in_progress: 'IN PROGRESS',
@@ -61,6 +69,7 @@ class Jobs extends Component {
     profileData: [],
     empsFilterList: [],
     salsFilter: '',
+    locationFilterList: jobLocationsList,
   }
 
   componentDidMount() {
@@ -78,17 +87,26 @@ class Jobs extends Component {
         Authorization: `Bearer ${cookieData}`,
       },
     }
-    const fetchingProfile = await fetch(profileUrl, options)
-    if (fetchingProfile.ok) {
-      const profileResp = await fetchingProfile.json()
-      this.setState({profileData: profileResp.profile_details})
-    } else {
-      this.setState({profileData: ''})
+    try {
+      const fetchingProfile = await fetch(profileUrl, options)
+      if (fetchingProfile.ok) {
+        const profileResp = await fetchingProfile.json()
+        this.setState({profileData: profileResp.profile_details})
+      } else {
+        this.setState({profileData: []})
+      }
+    } catch (e) {
+      console.log('Error in Profile Api ', e)
     }
   }
 
   startJobsApi = async () => {
-    const {inputSearch, empsFilterList, salsFilter} = this.state
+    const {
+      inputSearch,
+      empsFilterList,
+      salsFilter,
+      locationFilterList,
+    } = this.state
     const empsFilterStr =
       empsFilterList.length > 1
         ? empsFilterList.join(',')
@@ -103,18 +121,44 @@ class Jobs extends Component {
         Authorization: `Bearer ${cookieData}`,
       },
     }
-    const fetching = await fetch(url, options)
-    const response = await fetching.json()
-    // console.log('resp', response)
-    if (response) {
-      // console.log(response.total)
-      this.setState({apiStatus: apiStatusList.success, apiList: response})
-    } else {
+    try {
+      const fetching = await fetch(url, options)
+      if (fetching.ok) {
+        const response = await fetching.json()
+        // console.log('locationFilterList', locationFilterList)
+        const selectedJobsList = locationFilterList
+          .map(each => (each.filtered ? each.location.toLowerCase() : ''))
+          .filter(each => each.length > 0)
+        // console.log('selectedJobsList', selectedJobsList)
+        const filterLocationsList =
+          selectedJobsList.length === 0
+            ? response.jobs
+            : response.jobs.filter(eachJob =>
+                selectedJobsList.includes(eachJob.location.toLowerCase()),
+              )
+        // console.log('filterLocationsList : ', filterLocationsList)
+        const updatedData = {
+          total: filterLocationsList.length,
+          jobs: filterLocationsList,
+        }
+        // console.log('updatedData', updatedData)
+        this.setState({
+          apiStatus: apiStatusList.success,
+          apiList: updatedData,
+        })
+      } else {
+        this.setState({
+          apiStatus: apiStatusList.failure,
+          apiList: [],
+        })
+        console.log('Error in Api Response...')
+      }
+    } catch (e) {
+      console.log('Job Api Error!')
       this.setState({
         apiStatus: apiStatusList.failure,
         apiList: [],
       })
-      console.log('Error 1: ')
     }
   }
 
@@ -155,6 +199,22 @@ class Jobs extends Component {
     )
   }
 
+  filterLocation = locationInfo => (
+    <li className="filter-input-box" key={locationInfo.location}>
+      <label htmlFor={locationInfo.location} className="filter-input-label">
+        <input
+          type="checkbox"
+          className="filter-input"
+          id={locationInfo.location}
+          name="locationName"
+          value={locationInfo.location}
+          onChange={() => this.updateLocationApi(locationInfo)}
+        />
+        {locationInfo.location}
+      </label>
+    </li>
+  )
+
   updateSearchInput = e => {
     this.setState({inputSearch: e.target.value}, () => {
       this.startJobsApi()
@@ -189,32 +249,50 @@ class Jobs extends Component {
     }
   }
 
+  updateLocationApi = selectedLocation => {
+    // console.log(selectedLocation)
+    this.setState(
+      prev => {
+        const updatedLocList = prev.locationFilterList.map(each => {
+          if (each.location === selectedLocation.location) {
+            return {
+              ...each,
+              filtered: !each.filtered,
+            }
+          }
+          return each
+        })
+        return {locationFilterList: updatedLocList}
+      },
+      () => {
+        this.startJobsApi()
+      },
+    )
+  }
+
   renderProfileBox = () => {
     const {profileData} = this.state
-    return (
-      <>
-        {profileData ? (
-          <div className="profile-box" id="profile-box">
-            <img
-              src={profileData.profile_image_url}
-              alt="profile"
-              className="profile-img"
-            />
-            <h3 className="profile-name">{profileData.name}</h3>
-            <p className="profile-role">{profileData.short_bio}</p>
-          </div>
-        ) : (
-          <div className="profile-box error-profile-box" id="profile-box">
-            <button
-              type="button"
-              className="result-btn"
-              onClick={() => this.startProfileApi()}
-            >
-              Retry
-            </button>
-          </div>
-        )}
-      </>
+    // console.log('profileData', profileData)
+    return Object.keys(profileData).length > 0 ? (
+      <div className="profile-box" id="profile-box">
+        <img
+          src={profileData.profile_image_url}
+          alt="profile"
+          className="profile-img"
+        />
+        <h3 className="profile-name">{profileData.name}</h3>
+        <p className="profile-role">{profileData.short_bio}</p>
+      </div>
+    ) : (
+      <div className="profile-box error-profile-box" id="profile-box">
+        <button
+          type="button"
+          className="result-btn"
+          onClick={() => this.startProfileApi()}
+        >
+          Retry
+        </button>
+      </div>
     )
   }
 
@@ -283,7 +361,8 @@ class Jobs extends Component {
   }
 
   render() {
-    const {inputSearch} = this.state
+    const {inputSearch, locationFilterList} = this.state
+    // console.log('profileData : ', profileData)
     return (
       <div className="container">
         <Header />
@@ -307,6 +386,8 @@ class Jobs extends Component {
               </button>
             </div>
             {this.renderProfileBox()}
+
+            {/* Filter Emplyoment-Type */}
             <hr className="jobs-line" />
             <div className="filter-types-box">
               <h1 className="filter-head">Type of Employment</h1>
@@ -316,11 +397,24 @@ class Jobs extends Component {
                 )}
               </ul>
             </div>
+
+            {/* Filter Salary-RAnge */}
             <hr className="jobs-line" />
             <div className="filter-types-box">
               <h1 className="filter-head">Salary Range</h1>
               <ul className="filter-ul-box">
                 {salaryRangesList.map(eachItem => this.filterSalCBox(eachItem))}
+              </ul>
+            </div>
+
+            {/* Filter Job-Location */}
+            <hr className="jobs-line" />
+            <div className="filter-types-box">
+              <h1 className="filter-head">Locations</h1>
+              <ul className="filter-ul-box">
+                {locationFilterList.map(eachItem =>
+                  this.filterLocation(eachItem),
+                )}
               </ul>
             </div>
           </div>

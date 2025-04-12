@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom'
 import './index.css'
 
 class Login extends Component {
-  state = {username: 'rahul', password: 'rahul@2021', errorPara: ''}
+  state = {username: '', password: '', errorPara: ''}
 
   submitFunc = async e => {
     e.preventDefault()

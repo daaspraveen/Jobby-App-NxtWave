@@ -62,7 +62,7 @@ li {
 .desktop-logout-btn:hover {
   box-shadow: 0 0 8px 0 #6366f1;
 }
-.desktop-menu-box >li:last-child{
+.desktop-menu-box > li:last-child {
   margin-left: auto;
 }
 .mobile-logout-btn {
@@ -71,6 +71,9 @@ li {
   outline: none;
   cursor: pointer;
   padding: 0;
+}
+.mobile-logout-btn:hover * {
+  color: orangered;
 }
 
 @media screen and (max-width: 767px) {
