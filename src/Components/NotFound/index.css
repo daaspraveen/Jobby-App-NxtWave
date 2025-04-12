@@ -1,0 +1,34 @@
+.notfound-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  font-family: Roboto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.notfound-img {
+  width: 100%;
+  max-width: 400px;
+}
+.notfound-heading {
+  font-size: 28px;
+  color: #fff;
+  font-weight: 500;
+  margin: 0;
+}
+.notfound-para {
+  font-size: 14px;
+  font-weight: 400;
+  color: #f8fafc;
+  margin: 0;
+}
+.colors {
+  color: #64748b #4f46e5 #f8fafc #272727 #ffffff #b6c5ff #6366f1 #2c364c #000000
+    #f1f5f9 #fbbf24 #202020 #cbd5e1 #7e858e #121212 #475569 #ff0b37;
+}
